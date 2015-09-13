@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-"""Extracts files from a pcap file containing a (fragmented) HTTP download or stream
+"""Extracts files from a pcap file containing a (fragmented) HTTP download
+   or stream
 """
 
 # example usage:
-# justsniffer -f myfile.pcap  -l "%response" -e 'extract_file.py output.file'
+# justniffer -f myfile.pcap  -l "%response" -e 'extract_file.py output.file'
 
 import argparse
 import os
@@ -45,7 +46,8 @@ def parse_arguments():
 def create_file(output_file):
     if os.path.exists(output_file):
         if verbose:
-            print '{0} already exists - appending/overwriting...'.format(output_file)
+            print '{0} already exists - appending/overwriting...'. \
+                format(output_file)
         f = file(output_file, 'r+')
     else:
         f = file(output_file, 'w')
@@ -54,6 +56,7 @@ def create_file(output_file):
 def parse_stream(output_file):
     content = False
     offset = -1
+    filename = ''
     for line in sys.stdin:
         response = re.search('^(HTTP/.\.. )(\d\d\d)(.*)', line)
         if response:
@@ -61,24 +64,27 @@ def parse_stream(output_file):
             if verbose:
                 print 'HTTP response {0} detected'.format(response.group(2))
         content_range = re.search('^(Content-Range: bytes )(\d*)-(\d*)', line)
+        if content_range:
+            filename = '{0:0>8d}-{1:0>8d}.{2}'.format(
+                int(content_range.group(2)), int(content_range.group(3)),
+                extension)
+            offset = int(content_range.group(2))
+        if (line == eol_string) and (offset >= 0):
+            content = True
         if content:
             if partial and content_range:
                 with open(filename, 'a') as f:
                     f.write(line)
                     if verbose:
-                        print 'writing {1} bytes to {0}'.format(filename, len(line))
+                        print 'writing {1} bytes to {0}'.format(filename,
+                                                                len(line))
             with open(output_file, 'r+') as f:
                 if verbose:
-                    print 'opening {0}, seeking to {1}, writing {2} bytes'.format(output_file, offset, len(line))
+                    print 'opening {0}, seeking to {1}, writing {2} bytes'. \
+                        format(output_file, offset, len(line))
                     f.seek(offset, 0)
                     f.write(line)
                     offset = offset + len(line)
-        if content_range:
-            filename = '{0:0>8d}-{1:0>8d}.{2}'.format(
-                int(content_range.group(2)), int(content_range.group(3)), extension)
-            offset = int(content_range.group(2))
-        if (line == eol_string) and (offset >= 0):
-            content = True
 
 
 def main():

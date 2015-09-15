@@ -13,9 +13,11 @@ Example usage:
 justsniffer -f myfile.pcap -l "%response" -e 'extract_file.py output.file'
 ```
 
-This will extract the HTTP download from myfile.pcap and writes the output to output.file
+This will extract the (fragmented) HTTP download from myfile.pcap and writes the output to output.file
+justniffer will take care of the lower protocol layers.
 
-Auth
+Currently `extract_file.py` only handles streamed input.
+
 
 
 ## Setup

@@ -19,6 +19,17 @@ justniffer will take care of the lower protocol layers.
 Currently `extract_file.py` only handles streamed input.
 
 
+## web/timing-bruteforcer.py
+Bruteforces passwords by using a timing attack on webforms.
+Based on the notion that successful password (characters) are expected to take longer(!) to process than unsuccessful passwords.
+
+Example usage:
+```
+timing_bruteforcer.py http://my.site.com --username admin
+```
+
+Currently only hexadecimal 'passwords' are supported.
+
 
 ## Setup
 ```
